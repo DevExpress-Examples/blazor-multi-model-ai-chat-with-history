@@ -41,7 +41,7 @@ This example uses the following AI services:
 | [Azure OpenAI](https://azure.microsoft.com/en-us/products/ai-foundry/models/openai) | gpt-4.1                                        |
 | Local [Ollama](https://ollama.com/) deployment                                      | [phi4:latest](https://ollama.com/library/phi4) |
 
-For security, secrets are stored in the [appsettings.json](CS/DXBlazorCompositeChatClientWithHistory/appsettings.json) file. Update the following sections with your credentials:
+For security reasons, secrets are stored in the [appsettings.json](CS/DXBlazorCompositeChatClientWithHistory/appsettings.json) file. Update the following sections with your own credentials:
 
 - `OpenAISettings`
     - `Endpoint`: Your Azure OpenAI endpoint

@@ -121,7 +121,7 @@ In case of failure, the first six words of the user message serve as the title.
 
 ### Conversation History
 
-Each conversation thread is represented as a [ChatThread](CS/DXBlazorCompositeChatClientWithHistory/Services/ChatThread.cs) object. It contains the list of messages and metadata that is used in the UI for titles and ordering. [Index.razor](CS/DXBlazorCompositeChatClientWithHistory/Components/Pages/Index.razor) calls the [SaveMessages](https://docs.devexpress.com/Blazor/DevExpress.AIIntegration.Blazor.Chat.DxAIChat.SaveMessages) method before switching threads and [LoadMessages](https://docs.devexpress.com/Blazor/DevExpress.AIIntegration.Blazor.Chat.DxAIChat.LoadMessages(System.Collections.Generic.IEnumerable-DevExpress.AIIntegration.Blazor.Chat.BlazorChatMessage-)) when a thread becomes active.
+Each conversation thread is a [ChatThread](CS/DXBlazorCompositeChatClientWithHistory/Services/ChatThread.cs) object. It contains the list of messages and metadata that is used in the UI for titles and ordering. [Index.razor](CS/DXBlazorCompositeChatClientWithHistory/Components/Pages/Index.razor) calls the [SaveMessages](https://docs.devexpress.com/Blazor/DevExpress.AIIntegration.Blazor.Chat.DxAIChat.SaveMessages) method before switching threads and [LoadMessages](https://docs.devexpress.com/Blazor/DevExpress.AIIntegration.Blazor.Chat.DxAIChat.LoadMessages(System.Collections.Generic.IEnumerable-DevExpress.AIIntegration.Blazor.Chat.BlazorChatMessage-)) when a thread becomes active.
 
 [InMemoryChatThreadStore](CS/DXBlazorCompositeChatClientWithHistory/Services/InMemoryChatThreadStore.cs) keeps chat history in a dictionary guarded by a lock for thread-safety:
 

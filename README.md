@@ -129,7 +129,7 @@ Each conversation thread is a [ChatThread](CS/DXBlazorCompositeChatClientWithHis
 - Returns ordered threads.
 - Saves messages, updates titles, and updates model session IDs.
 
-Because a thread state is stored in memory, all chat history is lost when the application restarts.
+Since a thread state is stored in memory, all chat history is lost on the application restart.
 
 #### Persist Conversation History
 

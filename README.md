@@ -101,7 +101,7 @@ This section introduces key code blocks used in the example and how they work to
 
 This application uses a [two-pane layout](CS/DXBlazorCompositeChatClientWithHistory/Components/Pages/Index.razor) with a [DxSplitter](https://docs.devexpress.com/Blazor/DevExpress.Blazor.DxSplitter) that separates the sidebar and chat pane.
 
-Related styles reside in [Index.razor.css](CS/DXBlazorCompositeChatClientWithHistory/Components/Pages/Index.razor.css), which sets the sizing and spacing for the splitter, sidebar, and chat component.
+CSS styles that define the size and spacing for the splitter, sidebar, and chat component reside in [Index.razor.css](CS/DXBlazorCompositeChatClientWithHistory/Components/Pages/Index.razor.css).
 
 ### Multi-Model Chat
 

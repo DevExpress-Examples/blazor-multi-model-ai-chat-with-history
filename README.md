@@ -54,7 +54,7 @@ For security reasons, secrets are stored in the [appsettings.json](CS/DXBlazorCo
 > **Note**
 > Update [appsettings.Development.json](CS/DXBlazorCompositeChatClient/appsettings.Development.json) to test the example in your local development environment.
 
-The following code in [Program.cs](CS/DXBlazorCompositeChatClientWithHistory/Program.cs) retrieves the providers' API configuration. Modify this code if you prefer to keep keys in environment variables or User Secrets.
+The following code in [Program.cs](CS/DXBlazorCompositeChatClientWithHistory/Program.cs) retrieves the provider API configuration. Modify this code if you prefer to keep keys in environment variables or User Secrets.
 
 ```csharp
 var openAiServiceSettings = builder.Configuration.GetSection("OpenAISettings").Get<OpenAIServiceSettings>();

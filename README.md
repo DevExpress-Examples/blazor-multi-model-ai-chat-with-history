@@ -6,11 +6,11 @@
 <!-- default badges end -->
 # Blazor AI Chat — Multi-Model Chat with Conversation History
 
-This example implements a multi-model chat interface that allows users to toggle between high-performance cloud LLMs and private (local) models within a single environment. The example supports persistent chat threads with history management and automated title generation based on the user's initial prompt.
+This multi-model chat interface allows users to toggle between cloud LLMs and private (local) models within a single environment. Our sample project supports persistent chat threads with history management and automated title generation based on a user's initial prompt.
 
 ![Multi-Model Chat with Conversation History](ai-chat-multi-model.png)
 
-The application showcases the following DevExpress Blazor components:
+The sample app leverages the following DevExpress Blazor components:
 
 - [DxAIChat](https://docs.devexpress.com/Blazor/DevExpress.AIIntegration.Blazor.Chat.DxAIChat)
 - [DxSplitter](https://docs.devexpress.com/Blazor/DevExpress.Blazor.DxSplitter)
@@ -20,7 +20,7 @@ The application showcases the following DevExpress Blazor components:
 
 ## Setup and Configuration
 
-To run this example, configure project dependencies and set up secure authentication for the desired AI service.
+To run this sample, configure project dependencies and set up secure authentication for the desired AI service.
 
 ### Required Packages
 
@@ -33,7 +33,8 @@ We use the following versions of Microsoft AI packages in this project:
 | [Microsoft.Extensions.AI.Ollama](https://www.nuget.org/packages/Microsoft.Extensions.AI.Ollama)  | 9.7.0-preview.1.25356.2 |
 | [Azure.AI.OpenAI](https://www.nuget.org/packages/Azure.AI.OpenAI)                                | 2.2.0-beta.5            |
 
-We cannot guarantee compatibility or correct execution with newer versions. Refer to the following announcement for additional information: [DevExpress.AIIntegration moves to a stable version](https://supportcenter.devexpress.com/ticket/details/t1292705/devexpress-aiintegration-references-stable-versions-of-microsoft-ai-packages).
+> [!NOTE]
+> We cannot guarantee compatibility or correct execution with newer versions. Refer to the following announcement for additional information in this regard: [DevExpress.AIIntegration references stable versions of Microsoft AI packages](https://supportcenter.devexpress.com/ticket/details/t1292705/devexpress-aiintegration-references-stable-versions-of-microsoft-ai-packages).
 
 ### Register AI Services
 
@@ -58,7 +59,7 @@ For security reasons, secrets are stored in the [appsettings.json](CS/DXBlazorCo
     - `ModelName`: Local Ollama model
 
 > **Note**
-> Update [appsettings.Development.json](CS/DXBlazorCompositeChatClient/appsettings.Development.json) to test the example in your local development environment.
+> Update [appsettings.Development.json](CS/DXBlazorCompositeChatClient/appsettings.Development.json) to test this example in your local development environment.
 
 The following code in [Program.cs](CS/DXBlazorCompositeChatClientWithHistory/Program.cs) retrieves the provider API configuration. Modify this code if you prefer to keep keys in environment variables or User Secrets.
 
@@ -107,7 +108,7 @@ This section introduces key code blocks used in the example and how they work to
 
 This application uses a [two-pane layout](CS/DXBlazorCompositeChatClientWithHistory/Components/Pages/Index.razor) with a [DxSplitter](https://docs.devexpress.com/Blazor/DevExpress.Blazor.DxSplitter) that separates the sidebar and chat pane.
 
-CSS styles that define the size and spacing for the splitter, sidebar, and chat component reside in [Index.razor.css](CS/DXBlazorCompositeChatClientWithHistory/Components/Pages/Index.razor.css).
+CSS styles that define size and spacing for the splitter, sidebar, and chat component reside in [Index.razor.css](CS/DXBlazorCompositeChatClientWithHistory/Components/Pages/Index.razor.css).
 
 ### Multi-Model Chat
 
@@ -115,9 +116,9 @@ The application allows users to switch between cloud and local AI providers on-t
 
 - [Program.cs](CS/DXBlazorCompositeChatClientWithHistory/Program.cs) integrates two named [ChatClientSession](CS/DXBlazorCompositeChatClientWithHistory/Services/ChatClientSession.cs) instances (Azure OpenAI and Ollama) and registers them in the [CompositeChatClient](CS/DXBlazorCompositeChatClientWithHistory/Services/CompositeChatClient.cs) object. [CompositeChatClient](CS/DXBlazorCompositeChatClientWithHistory/Services/CompositeChatClient.cs) implements the [IChatClient](https://learn.microsoft.com/en-us/dotnet/api/microsoft.extensions.ai.ichatclient) interface and forwards chat requests to the current session.
 - [Index.razor](CS/DXBlazorCompositeChatClientWithHistory/Components/Pages/Index.razor) uses the [DxComboBox](https://docs.devexpress.com/Blazor/DevExpress.Blazor.DxComboBox-2) component bound to `CompositeChatClient.AvailableChatClients` and updates the selected session. Changing the model preserves existing chat history and continues the conversation with the newly selected model.
-- Each thread stores the model selection in the `ModelSessionId` property. Switching chat threads restores the model selection.
+- Each thread stores model selection in the `ModelSessionId` property. Switching chat threads restores the model selection.
 
-To support streaming responses, the chat uses the default message pipeline without the [MessageSent](https://docs.devexpress.com/Blazor/DevExpress.AIIntegration.Blazor.Chat.DxAIChat.MessageSent) event override.
+To support streaming responses, our chat implementation uses the default message pipeline without the [MessageSent](https://docs.devexpress.com/Blazor/DevExpress.AIIntegration.Blazor.Chat.DxAIChat.MessageSent) event override.
 
 ### Dynamic Title Generation
 
@@ -127,7 +128,7 @@ In case of failure, the first six words of the user message serve as the title.
 
 ### Conversation History
 
-Each conversation thread is a [ChatThread](CS/DXBlazorCompositeChatClientWithHistory/Services/ChatThread.cs) object. It contains the list of messages and metadata that is used in the UI for titles and ordering. [Index.razor](CS/DXBlazorCompositeChatClientWithHistory/Components/Pages/Index.razor) calls the [SaveMessages](https://docs.devexpress.com/Blazor/DevExpress.AIIntegration.Blazor.Chat.DxAIChat.SaveMessages) method before switching threads and [LoadMessages](https://docs.devexpress.com/Blazor/DevExpress.AIIntegration.Blazor.Chat.DxAIChat.LoadMessages(System.Collections.Generic.IEnumerable-DevExpress.AIIntegration.Blazor.Chat.BlazorChatMessage-)) when a thread becomes active.
+Each conversation thread is a [ChatThread](CS/DXBlazorCompositeChatClientWithHistory/Services/ChatThread.cs) object. It contains a list of messages and metadata that is used in the UI for titles and ordering. [Index.razor](CS/DXBlazorCompositeChatClientWithHistory/Components/Pages/Index.razor) calls the [SaveMessages](https://docs.devexpress.com/Blazor/DevExpress.AIIntegration.Blazor.Chat.DxAIChat.SaveMessages) method before switching threads and [LoadMessages](https://docs.devexpress.com/Blazor/DevExpress.AIIntegration.Blazor.Chat.DxAIChat.LoadMessages(System.Collections.Generic.IEnumerable-DevExpress.AIIntegration.Blazor.Chat.BlazorChatMessage-)) when a thread becomes active.
 
 [InMemoryChatThreadStore](CS/DXBlazorCompositeChatClientWithHistory/Services/InMemoryChatThreadStore.cs) keeps chat history in a dictionary guarded by a lock for thread-safety:
 
@@ -135,11 +136,11 @@ Each conversation thread is a [ChatThread](CS/DXBlazorCompositeChatClientWithHis
 - Returns ordered threads.
 - Saves messages, updates titles, and updates model session IDs.
 
-Since a thread state is stored in memory, all chat history is lost on the application restart.
+Since thread state is stored in memory, all chat history is lost when the application restarts.
 
 #### Persist Conversation History
 
-To persist chat history when application restarts, implement [IChatThreadStore](CS/DXBlazorCompositeChatClientWithHistory/Services/IChatThreadStore.cs) with a database-backed store (for example, EF Core). Then replace [InMemoryChatThreadStore](CS/DXBlazorCompositeChatClientWithHistory/Services/InMemoryChatThreadStore.cs) with your implementation in [Program.cs](CS/DXBlazorCompositeChatClientWithHistory/Program.cs):
+To persist chat history when the application restarts, implement [IChatThreadStore](CS/DXBlazorCompositeChatClientWithHistory/Services/IChatThreadStore.cs) with a database-backed store (for example, EF Core). Then replace [InMemoryChatThreadStore](CS/DXBlazorCompositeChatClientWithHistory/Services/InMemoryChatThreadStore.cs) with your implementation in [Program.cs](CS/DXBlazorCompositeChatClientWithHistory/Program.cs):
 
 ```scharp
 // Replace with your database-backed implementation

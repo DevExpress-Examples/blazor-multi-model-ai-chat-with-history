@@ -8,7 +8,9 @@ public class CompositeChatClient : IChatClient
     private readonly IChatThreadTitleGenerator _titleGenerator;
     private readonly object _syncRoot = new();
     private readonly HashSet<Guid> _titleGenerationInProgress = new();
+    private readonly HashSet<Guid> _titledThreadIds = new();
     private Guid? _activeThreadId;
+    private TaskCompletionSource? _titleGenerationGate;
 
     public List<ChatClientSession> AvailableChatClients { get; }
     public ChatClientSession? SelectedSession { get; set; }
@@ -38,29 +40,70 @@ public class CompositeChatClient : IChatClient
         _activeThreadId = threadId;
     }
 
-    public Task<ChatResponse> GetResponseAsync(IEnumerable<ChatMessage> messages, ChatOptions? options = null,
+    public async Task<ChatResponse> GetResponseAsync(IEnumerable<ChatMessage> messages, ChatOptions? options = null,
         CancellationToken cancellationToken = new CancellationToken())
     {
         var selectedSession = GetRequiredSelectedSession();
-        TryQueueTitleGeneration(messages, selectedSession);
-        return selectedSession.Client.GetResponseAsync(messages, options, cancellationToken);
+        var messageList = messages.ToList();
+        TryQueueTitleGeneration(messageList, selectedSession);
+        var gate = _titleGenerationGate;
+        try
+        {
+            var response = await selectedSession.Client.GetResponseAsync(messageList, options, cancellationToken);
+            SignalTitleGenerationGate(gate, succeeded: true);
+            return response;
+        }
+        catch
+        {
+            SignalTitleGenerationGate(gate, succeeded: false);
+            throw;
+        }
     }
 
     public IAsyncEnumerable<ChatResponseUpdate> GetStreamingResponseAsync(IEnumerable<ChatMessage> messages, ChatOptions? options = null,
-        CancellationToken cancellationToken = new CancellationToken()) {
+        CancellationToken cancellationToken = new CancellationToken())
+    {
         var selectedSession = GetRequiredSelectedSession();
-        TryQueueTitleGeneration(messages, selectedSession);
-        return selectedSession.Client.GetStreamingResponseAsync(messages, options, cancellationToken);
+        var messageList = messages.ToList();
+        TryQueueTitleGeneration(messageList, selectedSession);
+        var gate = _titleGenerationGate;
+
+        return Iterator();
+
+        async IAsyncEnumerable<ChatResponseUpdate> Iterator()
+        {
+            var streamCompleted = false;
+            try
+            {
+                await foreach (var update in selectedSession.Client.GetStreamingResponseAsync(messageList, options, cancellationToken))
+                    yield return update;
+                streamCompleted = true;
+            }
+            finally
+            {
+                SignalTitleGenerationGate(gate, streamCompleted);
+            }
+        }
     }
 
-    public void Dispose() {
+    private static void SignalTitleGenerationGate(TaskCompletionSource? gate, bool succeeded)
+    {
+        if (succeeded)
+            gate?.TrySetResult();
+        else
+            gate?.TrySetCanceled();
+    }
+
+    public void Dispose()
+    {
         foreach (var session in AvailableChatClients)
         {
             session.Client.Dispose();
         }
     }
 
-    public object? GetService(Type serviceType, object? serviceKey = null) {
+    public object? GetService(Type serviceType, object? serviceKey = null)
+    {
         return GetRequiredSelectedSession().Client.GetService(serviceType, serviceKey);
     }
 
@@ -80,20 +123,32 @@ public class CompositeChatClient : IChatClient
 
         lock (_syncRoot)
         {
+            if (_titledThreadIds.Contains(threadId))
+            {
+                return;
+            }
+
             if (_titleGenerationInProgress.Contains(threadId))
             {
                 return;
             }
+
             _titleGenerationInProgress.Add(threadId);
         }
 
+        _titleGenerationGate?.TrySetCanceled();
+        _titleGenerationGate = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         _ = GenerateTitleForThreadAsync(threadId, selectedSession, firstUserMessage);
     }
 
     private async Task GenerateTitleForThreadAsync(Guid threadId, ChatClientSession selectedSession, string firstUserMessage)
     {
+        var gate = _titleGenerationGate;
         try
         {
+            if (gate != null)
+                await gate.Task;
+
             var thread = await _threadStore.GetThreadAsync(threadId, CancellationToken.None);
             if (thread is null || thread.HasGeneratedTitle)
             {
@@ -118,7 +173,14 @@ public class CompositeChatClient : IChatClient
             }
 
             await _threadStore.UpdateTitleAsync(threadId, generatedTitle, true, CancellationToken.None);
+            lock (_syncRoot)
+            {
+                _titledThreadIds.Add(threadId);
+            }
             ThreadTitleUpdated?.Invoke(threadId, generatedTitle);
+        }
+        catch (OperationCanceledException)
+        {
         }
         finally
         {
